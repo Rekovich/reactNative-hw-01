@@ -1,10 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
 
 import { ImageBackground, View, StyleSheet, KeyboardAvoidingView, TouchableOpacity, Platform, Text, TextInput } from "react-native";
 
 const addButtonImage = require("../assets/images/add.png");
 
-const RegistrationScreen = () => {
+const RegistrationScreen = ({ changeScreen }) => {
+  const [login, setLogin] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = (text) => setLogin(text);
+  const handleEmail = (text) => setEmail(text);
+  const handlePassword = (text) => setPassword(text);
+
+  const user = () => {
+    if (!login || !email || !password) {
+      alert("Enter all fields please!");
+      return;
+    }
+    console.log(`Login: ${login}, Email: ${email}, Password: ${password}`);
+  };
+
+  const showPassword = () => alert(`Your password is: ${password}.`);
+
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.containerKeyboard}>
       <View style={styles.container}>
@@ -16,19 +34,19 @@ const RegistrationScreen = () => {
 
         <Text style={styles.title}>Реєстрація</Text>
 
-        <TextInput style={styles.inputLogin} placeholder="Логін" />
-        <TextInput style={styles.input} placeholder="Адрес електронної пошти" />
-        <TextInput style={styles.input} placeholder="Пароль" secureTextEntry={true} />
+        <TextInput style={styles.inputLogin} placeholder="Логін" value={login} onChangeText={handleLogin} />
+        <TextInput style={styles.input} placeholder="Адрес електронної пошти" value={email} onChangeText={handleEmail} />
+        <TextInput style={styles.input} placeholder="Пароль" secureTextEntry={true} value={password} onChangeText={handlePassword} />
 
-        <TouchableOpacity style={styles.passwordShow} activeOpacity={0.5}>
+        <TouchableOpacity style={styles.passwordShow} activeOpacity={0.5} onPress={showPassword}>
           <Text style={styles.passwordShowText}>Показати</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.registerBtn} activeOpacity={0.5}>
+        <TouchableOpacity style={styles.registerBtn} activeOpacity={0.5} onPress={user}>
           <Text style={styles.registerBtnText}>Зареєструватись</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.loginLink} activeOpacity={0.5}>
+        <TouchableOpacity style={styles.loginLink} activeOpacity={0.5} onPress={() => changeScreen(0)}>
           <Text style={styles.loginLinkText}>Вже є аккаунт? Ввійти</Text>
         </TouchableOpacity>
       </View>

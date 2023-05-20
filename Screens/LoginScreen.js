@@ -1,24 +1,40 @@
-import React from "react";
+import React, { useState } from "react";
 import { KeyboardAvoidingView, View, TouchableOpacity, TextInput, Text, StyleSheet, Platform } from "react-native";
 
-const LoginScreen = () => {
+const LoginScreen = ({ changeScreen }) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleEmail = (text) => setEmail(text);
+  const handlePassword = (text) => setPassword(text);
+
+  const user = () => {
+    if (!email || !password) {
+      alert("Enter all fields please!");
+      return;
+    }
+    console.log(`Email: ${email}, Password: ${password}`);
+  };
+
+  const showPassword = () => alert(`Your password is: ${password}.`);
+
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.containerKeyboard}>
       <View style={styles.container}>
         <Text style={styles.title}>Ввійти</Text>
 
-        <TextInput style={styles.input} placeholder="Адрес електронної пошти" />
-        <TextInput style={styles.input} placeholder="Пароль" secureTextEntry={true} />
+        <TextInput style={styles.input} placeholder="Адрес електронної пошти" value={email} onChangeText={handleEmail} />
+        <TextInput style={styles.input} placeholder="Пароль" secureTextEntry={true} value={password} onChangeText={handlePassword} />
 
-        <TouchableOpacity style={styles.passwordShow} activeOpacity={0.5}>
+        <TouchableOpacity style={styles.passwordShow} activeOpacity={0.5} onPress={showPassword}>
           <Text style={styles.passwordShowText}>Показати</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.registerBtn} activeOpacity={0.5}>
+        <TouchableOpacity style={styles.registerBtn} activeOpacity={0.5} onPress={user}>
           <Text style={styles.registerBtnText}>Ввійти</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.loginLink} activeOpacity={0.5}>
+        <TouchableOpacity style={styles.loginLink} activeOpacity={0.5} onPress={() => changeScreen(1)}>
           <Text style={styles.loginLinkText}>Ще немає аккаута? Зареєструватися</Text>
         </TouchableOpacity>
       </View>
