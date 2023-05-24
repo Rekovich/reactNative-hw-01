@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 
 import { ImageBackground, View, StyleSheet, KeyboardAvoidingView, TouchableOpacity, Platform, Text, TextInput } from "react-native";
+import { StatusBar } from "expo-status-bar";
+
+const backgroundImage = require("../assets/images/photo-bg.png");
 
 const addButtonImage = require("../assets/images/add.png");
 
-const RegistrationScreen = ({ changeScreen }) => {
+const RegistrationScreen = ({ navigation }) => {
   const [login, setLogin] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -19,44 +22,59 @@ const RegistrationScreen = ({ changeScreen }) => {
       return;
     }
     console.log(`Login: ${login}, Email: ${email}, Password: ${password}`);
+    navigation.navigate("Home", { screen: "PostsScreen" });
   };
 
   const showPassword = () => alert(`Your password is: ${password}.`);
 
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.containerKeyboard}>
-      <View style={styles.container}>
-        <View style={styles.containerAvatar}>
-          <TouchableOpacity style={styles.addBtn}>
-            <ImageBackground source={addButtonImage} style={styles.addBtnImage}></ImageBackground>
-          </TouchableOpacity>
-        </View>
+    <View style={styles.mainContainer}>
+      <ImageBackground source={backgroundImage} style={styles.bgImage}>
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.containerKeyboard}>
+          <View style={styles.container}>
+            <View style={styles.containerAvatar}>
+              <TouchableOpacity style={styles.addBtn}>
+                <ImageBackground source={addButtonImage} style={styles.addBtnImage}></ImageBackground>
+              </TouchableOpacity>
+            </View>
 
-        <Text style={styles.title}>Реєстрація</Text>
+            <Text style={styles.title}>Реєстрація</Text>
 
-        <TextInput style={styles.inputLogin} placeholder="Логін" value={login} onChangeText={handleLogin} />
-        <TextInput style={styles.input} placeholder="Адрес електронної пошти" value={email} onChangeText={handleEmail} />
-        <TextInput style={styles.input} placeholder="Пароль" secureTextEntry={true} value={password} onChangeText={handlePassword} />
+            <TextInput style={styles.inputLogin} placeholder="Логін" value={login} onChangeText={handleLogin} />
+            <TextInput style={styles.input} placeholder="Адрес електронної пошти" value={email} onChangeText={handleEmail} />
+            <TextInput style={styles.input} placeholder="Пароль" secureTextEntry={true} value={password} onChangeText={handlePassword} />
 
-        <TouchableOpacity style={styles.passwordShow} activeOpacity={0.5} onPress={showPassword}>
-          <Text style={styles.passwordShowText}>Показати</Text>
-        </TouchableOpacity>
+            <TouchableOpacity style={styles.passwordShow} activeOpacity={0.5} onPress={showPassword}>
+              <Text style={styles.passwordShowText}>Показати</Text>
+            </TouchableOpacity>
 
-        <TouchableOpacity style={styles.registerBtn} activeOpacity={0.5} onPress={user}>
-          <Text style={styles.registerBtnText}>Зареєструватись</Text>
-        </TouchableOpacity>
+            <TouchableOpacity style={styles.registerBtn} activeOpacity={0.5} onPress={user}>
+              <Text style={styles.registerBtnText}>Зареєструватись</Text>
+            </TouchableOpacity>
 
-        <TouchableOpacity style={styles.loginLink} activeOpacity={0.5} onPress={() => changeScreen(0)}>
-          <Text style={styles.loginLinkText}>Вже є аккаунт? Ввійти</Text>
-        </TouchableOpacity>
-      </View>
-    </KeyboardAvoidingView>
+            <TouchableOpacity style={styles.loginLink} activeOpacity={0.5} onPress={() => navigation.navigate('Login')}>
+              <Text style={styles.loginLinkText}>Вже є аккаунт? Ввійти</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </ImageBackground>
+      <StatusBar style="auto" />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    alignItems: 'center',
+  }, 
+  bgImage: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    width: '100%'
+  },
   container: {
-    marginBottom: -120,
+    // marginBottom: -120,
     backgroundColor: "#ffffff",
     alignItems: "center",
     width: "100%",
