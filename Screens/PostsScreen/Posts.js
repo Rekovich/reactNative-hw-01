@@ -1,21 +1,38 @@
-import { View, StyleSheet, ImageBackground, Text } from "react-native";
-import {EvilIcons, Feather} from '@expo/vector-icons'
+import { View, StyleSheet, ImageBackground, Text, TouchableOpacity } from "react-native";
+import { EvilIcons, Feather } from "@expo/vector-icons";
+import { useEffect, useState } from "react";
+// import { useNavigation } from "@react-navigation/native";
 
-const Posts = ({ image, text, message, location }) => {
+const Posts = ({ image, text, message, location, gps, navigation }) => {
+  // const navigation = useNavigation()
+  const [gpsLocation, setGpsLocation] = useState({});
+
+  useEffect(() => {
+    setGpsLocation(gps);
+  }, []);
+
+  const handleCommentClick = () => {
+    navigation.navigate("Comments");
+  };
+
+  const handleMapClick = () => {
+    navigation.navigate("Map", { location });
+  };
+
   return (
     <View style={styles.container}>
       <ImageBackground source={image} style={styles.postImage}></ImageBackground>
       <Text style={styles.postText}>{text}</Text>
       <View style={styles.postInfoContainer}>
-        <View style={styles.postInfo}>
+        <TouchableOpacity style={styles.postInfo} onPress={() => navigation.navigate("Comments")}>
           <Feather name="message-circle" size={18} color="gray" />
           <Text>{message}</Text>
-        </View>
+        </TouchableOpacity>
 
-        <View style={styles.postInfo}>
+        <TouchableOpacity style={styles.postInfo} onPress={handleMapClick}>
           <EvilIcons name="location" size={24} color="gray" />
           <Text style={styles.postInfoLink}>{location}</Text>
-        </View>
+        </TouchableOpacity>
       </View>
     </View>
   );

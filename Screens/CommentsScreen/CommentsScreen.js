@@ -1,7 +1,9 @@
-import React from 'react'
+import { Text } from "react-native"
 
-export default function CommentsScreen() {
-  return (
-    <div>CommentsScreen</div>
-  )
-}
+const Comments = () => {
+    return(
+        <Text>Comments here will be soon...</Text>
+    )
+};
+
+export  default Comments;

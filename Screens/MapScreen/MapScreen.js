@@ -1,7 +1,7 @@
-import React from 'react'
+import { Text } from "react-native"
 
-export default function MapScreen() {
-  return (
-    <div>MapScreen</div>
-  )
-}
+const Map = ({route}) => {
+  <Text>{ route }</Text>
+};
+
+export default Map;
