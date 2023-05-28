@@ -1,52 +1,93 @@
 import React, { useState } from "react";
-import { KeyboardAvoidingView, View, TouchableOpacity, TextInput, Text, StyleSheet, Platform, ImageBackground } from "react-native";
+import {
+  KeyboardAvoidingView,
+  View,
+  TouchableOpacity,
+  TextInput,
+  Text,
+  StyleSheet,
+  Platform,
+  ImageBackground,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from "react-native";
 import { StatusBar } from "expo-status-bar";
+import { useDispatch, useSelector } from "react-redux";
+import { selectIsAuth } from "../redux/auth/authSelectors";
+import { fetchLoginUser } from "../redux/auth/authOperations";
 
 const backgroundImage = require("../assets/images/photo-bg.png");
 
 const LoginScreen = ({ navigation }) => {
+  const logedIn = useSelector(selectIsAuth);
+
+  if (logedIn) {
+    navigation.navigate("Home", { screen: "PostsScreen" });
+  }
+
+  //state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleEmail = (text) => setEmail(text);
-  const handlePassword = (text) => setPassword(text);
+  //redux
+  const dispatch = useDispatch();
+
+  const handleEmail = (text) => {
+    setEmail(text);
+  };
+  const handlePassword = (text) => {
+    setPassword(text);
+  };
 
   const user = () => {
     if (!email || !password) {
       alert("Enter all fields please!");
       return;
     }
-    navigation.navigate("Home", { screen: "PostsScreen" });
+    // navigation.navigate("Home", { screen: "PostsScreen" });
+    dispatch(fetchLoginUser({ email, password })).then((result) => {
+      result.type === "auth/fetchLoginUser/fulfilled" && navigation.navigate("Home", { screen: "PostsScreen" });
+      result.type !== "auth/fetchLoginUser/fulfilled" && alert("Incorrect login!!!");
+    });
+    // console.log(useSelector(selectIsAuth));
   };
 
   const showPassword = () => alert(`Your password is: ${password}.`);
 
   return (
-    <View style={styles.mainContainer}>
-      <ImageBackground source={backgroundImage} style={styles.bgImage}>
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.containerKeyboard}>
-          <View style={styles.container}>
-            <Text style={styles.title}>Ввійти</Text>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.mainContainer}>
+        <ImageBackground source={backgroundImage} style={styles.bgImage}>
+          <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.containerKeyboard}>
+            <View style={styles.container}>
+              <Text style={styles.title}>Ввійти</Text>
 
-            <TextInput style={styles.input} placeholder="Адрес електронної пошти" value={email} onChangeText={handleEmail} />
-            <TextInput style={styles.input} placeholder="Пароль" secureTextEntry={true} value={password} onChangeText={handlePassword} />
+              <TextInput style={styles.input} placeholder="Адрес електронної пошти" value={email} onChangeText={handleEmail} />
+              <TextInput style={styles.input} placeholder="Пароль" secureTextEntry={true} value={password} onChangeText={handlePassword} />
 
-            <TouchableOpacity style={styles.passwordShow} activeOpacity={0.5} onPress={showPassword}>
-              <Text style={styles.passwordShowText}>Показати</Text>
-            </TouchableOpacity>
+              <TouchableOpacity style={styles.passwordShow} activeOpacity={0.5} onPress={showPassword}>
+                <Text style={styles.passwordShowText}>Показати</Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity style={styles.registerBtn} activeOpacity={0.5} onPress={user}>
-              <Text style={styles.registerBtnText}>Ввійти</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.registerBtn}
+                activeOpacity={0.5}
+                onPress={() => {
+                  user();
+                }}
+              >
+                <Text style={styles.registerBtnText}>Ввійти</Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity style={styles.loginLink} activeOpacity={0.5} onPress={() => navigation.navigate("Registration")}>
-              <Text style={styles.loginLinkText}>Ще немає аккаута? Зареєструватися</Text>
-            </TouchableOpacity>
-          </View>
-        </KeyboardAvoidingView>
-      </ImageBackground>
-      <StatusBar style="auto" />
-    </View>
+              <TouchableOpacity style={styles.loginLink} activeOpacity={0.5} onPress={() => navigation.navigate("Registration", {})}>
+                <Text style={styles.loginLinkText}>Ще немає аккаута? Зареєструватися</Text>
+              </TouchableOpacity>
+            </View>
+          </KeyboardAvoidingView>
+        </ImageBackground>
+        <StatusBar style="auto" />
+      </View>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -61,7 +102,6 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   container: {
-    // marginBottom: -200,
     backgroundColor: "#ffffff",
     alignItems: "center",
     width: "100%",
@@ -94,7 +134,6 @@ const styles = StyleSheet.create({
     fontSize: 30,
     marginTop: 32,
     lineHeight: 35,
-    // textAlign: "center",
   },
   inputLogin: {
     backgroundColor: "#F6F6F6",
@@ -107,8 +146,6 @@ const styles = StyleSheet.create({
     fontWeight: "400",
     fontSize: 16,
     lineHeight: 19,
-    // marginLeft: "auto",
-    // marginRight: "auto",
   },
   input: {
     backgroundColor: "#F6F6F6",
@@ -117,8 +154,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 16,
     marginTop: 16,
-    // marginLeft: "auto",
-    // marginRight: "auto",
     fontStyle: "normal",
     fontWeight: "400",
     fontSize: 16,
@@ -142,8 +177,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 100,
     marginTop: 44,
-    // marginLeft: "auto",
-    // marginRight: "auto",
   },
   registerBtnText: {
     color: "#fff",

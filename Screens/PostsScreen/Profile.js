@@ -1,12 +1,16 @@
-import { ImageBackground, StyleSheet, Text, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
+import { useSelector } from "react-redux";
+import { selectUser } from "../../redux/auth/authSelectors";
 
-const Profile = ({ avatar, name, email }) => {
+const Profile = () => {
+  const { user, name, photo } = useSelector(selectUser);
+
   return (
     <View style={styles.container}>
-      <ImageBackground source={avatar} style={styles.image}></ImageBackground>
+      <Image source={{ uri: `${photo}` }} style={styles.image}></Image>
       <View style={styles.info}>
         <Text style={styles.name}>{name}</Text>
-        <Text>{email}</Text>
+        <Text>{user}</Text>
       </View>
     </View>
   );

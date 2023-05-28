@@ -1,13 +1,29 @@
 import React, { useState } from "react";
 
-import { ImageBackground, View, StyleSheet, KeyboardAvoidingView, TouchableOpacity, Platform, Text, TextInput } from "react-native";
+import {
+  ImageBackground,
+  View,
+  StyleSheet,
+  KeyboardAvoidingView,
+  TouchableOpacity,
+  Platform,
+  Text,
+  TextInput,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from "react-native";
 import { StatusBar } from "expo-status-bar";
+import { useDispatch } from "react-redux";
+import { fetchRegisterUser } from "../redux/auth/authOperations";
+import { AntDesign } from "@expo/vector-icons";
 
 const backgroundImage = require("../assets/images/photo-bg.png");
 
-const addButtonImage = require("../assets/images/add.png");
+const RegistrationScreen = ({ navigation, route }) => {
+  const { photo } = route.params;
 
-const RegistrationScreen = ({ navigation }) => {
+  const dispatch = useDispatch();
+
   const [login, setLogin] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -22,56 +38,70 @@ const RegistrationScreen = ({ navigation }) => {
       return;
     }
     console.log(`Login: ${login}, Email: ${email}, Password: ${password}`);
-    navigation.navigate("Home", { screen: "PostsScreen" });
+    dispatch(fetchRegisterUser({ email, password, login, photo })).then((result) => {
+      result.type === "auth/fetchRegisterUser/fulfilled" && navigation.navigate("Home", { screen: "PostsScreen" });
+      result.type !== "auth/fetchRegisterUser/fulfilled" && alert("Incorrect registration!!!");
+    });
+  };
+
+  const takePhoto = () => {
+    navigation.navigate("ProfilePhotoScreen");
   };
 
   const showPassword = () => alert(`Your password is: ${password}.`);
 
   return (
-    <View style={styles.mainContainer}>
-      <ImageBackground source={backgroundImage} style={styles.bgImage}>
-        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.containerKeyboard}>
-          <View style={styles.container}>
-            <View style={styles.containerAvatar}>
-              <TouchableOpacity style={styles.addBtn}>
-                <ImageBackground source={addButtonImage} style={styles.addBtnImage}></ImageBackground>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.mainContainer}>
+        <ImageBackground source={backgroundImage} style={styles.bgImage}>
+          <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.containerKeyboard}>
+            <View style={styles.container}>
+              <View style={styles.containerAvatar}>{photo && <Image source={{ uri: `${photo}` }} style={styles.photoProf} />}</View>
+              <TouchableOpacity
+                style={styles.addBtn}
+                activeOpacity={0.5}
+                onPress={() => {
+                  takePhoto();
+                }}
+              >
+                <AntDesign name="pluscircleo" size={24} color="red" />
+              </TouchableOpacity>
+
+              <Text style={styles.title}>Реєстрація</Text>
+
+              <TextInput style={styles.inputLogin} placeholder="Логін" value={login} onChangeText={handleLogin} />
+              <TextInput style={styles.input} placeholder="Адрес електронної пошти" value={email} onChangeText={handleEmail} />
+              <TextInput style={styles.input} placeholder="Пароль" secureTextEntry={true} value={password} onChangeText={handlePassword} />
+
+              <TouchableOpacity style={styles.passwordShow} activeOpacity={0.5} onPress={showPassword}>
+                <Text style={styles.passwordShowText}>Показати</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.registerBtn} activeOpacity={0.5} onPress={user}>
+                <Text style={styles.registerBtnText}>Зареєструватись</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.loginLink} activeOpacity={0.5} onPress={() => navigation.navigate("Login")}>
+                <Text style={styles.loginLinkText}>Вже є аккаунт? Ввійти</Text>
               </TouchableOpacity>
             </View>
-
-            <Text style={styles.title}>Реєстрація</Text>
-
-            <TextInput style={styles.inputLogin} placeholder="Логін" value={login} onChangeText={handleLogin} />
-            <TextInput style={styles.input} placeholder="Адрес електронної пошти" value={email} onChangeText={handleEmail} />
-            <TextInput style={styles.input} placeholder="Пароль" secureTextEntry={true} value={password} onChangeText={handlePassword} />
-
-            <TouchableOpacity style={styles.passwordShow} activeOpacity={0.5} onPress={showPassword}>
-              <Text style={styles.passwordShowText}>Показати</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.registerBtn} activeOpacity={0.5} onPress={user}>
-              <Text style={styles.registerBtnText}>Зареєструватись</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.loginLink} activeOpacity={0.5} onPress={() => navigation.navigate('Login')}>
-              <Text style={styles.loginLinkText}>Вже є аккаунт? Ввійти</Text>
-            </TouchableOpacity>
-          </View>
-        </KeyboardAvoidingView>
-      </ImageBackground>
-      <StatusBar style="auto" />
-    </View>
+          </KeyboardAvoidingView>
+        </ImageBackground>
+        <StatusBar style="auto" />
+      </View>
+    </TouchableWithoutFeedback>
   );
 };
 
 const styles = StyleSheet.create({
   mainContainer: {
     flex: 1,
-    alignItems: 'center',
-  }, 
+    alignItems: "center",
+  },
   bgImage: {
     flex: 1,
-    justifyContent: 'flex-end',
-    width: '100%'
+    justifyContent: "flex-end",
+    width: "100%",
   },
   container: {
     // marginBottom: -120,
@@ -86,16 +116,17 @@ const styles = StyleSheet.create({
   },
   containerAvatar: {
     marginTop: -60,
+    position: "relative",
     height: 120,
     width: 120,
     backgroundColor: "#F6F6F6",
     borderRadius: 16,
+    overflow: "hidden",
   },
   addBtn: {
-    marginTop: "65%",
-    left: "90%",
-    height: 25,
-    width: 25,
+    position: "absolute",
+    left: "62%",
+    top: 10,
     pointerEvents: "auto",
   },
   addBtnImage: {
@@ -173,6 +204,12 @@ const styles = StyleSheet.create({
     lineHeight: 19,
     textAlign: "center",
     color: "#1B4371",
+  },
+  photoProf: {
+    width: "100%",
+    height: "100%",
+    overflow: "hidden",
+    alignSelf: "center",
   },
 });
 

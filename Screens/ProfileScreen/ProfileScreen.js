@@ -1,17 +1,28 @@
 import React from "react";
 import { useNavigation } from "@react-navigation/native";
-import { ImageBackground, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import data from "../../source/data";
-import Posts from "../PostsScreen/Posts";
+import { FlatList, ImageBackground, Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+
 import { Feather } from "@expo/vector-icons";
+import { useSelector } from "react-redux";
+import { selectAuthPosts } from "../../redux/posts/postsSelectors";
+import { selectUser } from "../../redux/auth/authSelectors";
+import { selectComment } from "../../redux/comments/commentsSelectors";
 
 const bgImage = require("../../assets/images/photo-bg.png");
 const addBtn = require("../../assets/images/add.png");
-const avatar = require("../../assets/images/avatar.png");
-const postImage = require("../../assets/images/post_image.png");
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
+
+  const allComments = useSelector(selectComment);
+
+  const getCommentsCount = (id) => {
+    const commentsCount = allComments.filter((item) => item.postId === id).length;
+    return commentsCount;
+  };
+
+  const posts = useSelector(selectAuthPosts);
+  const { name, photo } = useSelector(selectUser);
 
   return (
     <SafeAreaView>
@@ -20,7 +31,7 @@ const ProfileScreen = () => {
           <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
             <View style={styles.container}>
               <View style={styles.imageContainer}>
-                <ImageBackground source={avatar} style={{ width: "100%", height: "100%" }}></ImageBackground>
+                <Image source={{ uri: `${photo}` }} style={{ width: "100%", height: "100%", borderRadius: 15 }}></Image>
                 <TouchableOpacity style={styles.add} activeOpacity={0.5}>
                   <ImageBackground source={addBtn} style={{ width: "100%", height: "100%" }}></ImageBackground>
                 </TouchableOpacity>
@@ -28,10 +39,40 @@ const ProfileScreen = () => {
               <TouchableOpacity style={styles.logoutBtn} activeOpacity={0.5} onPress={() => navigation.navigate("Home", { screen: "PostsScreen" })}>
                 <Feather name="log-out" size={24} color="gray" />
               </TouchableOpacity>
-              <Text style={styles.title}>Natali Romanova</Text>
-              {data.map((elem) => (
-                <Posts key={elem.id} image={postImage} text={elem.name} message={0} location={elem.location} />
-              ))}
+              <Text style={styles.title}>{name}</Text>
+              <View style={{ flex: 1, justifyContent: "center" }}>
+                <FlatList
+                  data={posts}
+                  keyExtractor={(item, indx) => indx.toString()}
+                  renderItem={({ item }) => (
+                    <View
+                      style={{
+                        marginTop: 20,
+                        marginBottom: 30,
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Image source={{ uri: `${item.photo}` }} style={{ width: 380, height: 280, borderRadius: 15 }} />
+                      <Text style={styles.posText}>{item.title}</Text>
+                      <View style={{ display: "flex", justifyContent: "space-between", flexDirection: "row", width: "85%" }}>
+                        <TouchableOpacity
+                          style={styles.info}
+                          onPress={() => navigation.navigate("CommentsNav", { postId: item.id, postImg: item.photo })}
+                        >
+                          <Feather name="message-circle" size={18} color="gray" />
+                          <Text>{getCommentsCount(item.id)}</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={styles.info} onPress={() => navigation.navigate("Map", { location: item.location })}>
+                          <EvilIcons name="location" size={24} color="gray" />
+                          <Text style={styles.infoLink}>{item.inputRegion}</Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  )}
+                ></FlatList>
+              </View>
             </View>
           </View>
         </ImageBackground>
@@ -150,6 +191,22 @@ const styles = StyleSheet.create({
     fontWeight: "400",
     fontSize: 16,
     lineHeight: 19,
+  },
+  posText: {
+    alignSelf: "flex-start",
+    marginTop: 8,
+    marginLeft: 40,
+    fontWeight: "500",
+    fontSize: 16,
+  },
+  info: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 5,
+    padding: 10,
+  },
+  infoLink: {
+    textDecorationLine: "underline",
   },
 });
 

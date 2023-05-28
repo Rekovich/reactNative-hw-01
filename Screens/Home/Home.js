@@ -1,21 +1,39 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { useNavigation } from "@react-navigation/native";
-import React from "react";
+import React, { useEffect } from "react";
 import { AntDesign, SimpleLineIcons, Feather } from "@expo/vector-icons";
 import { TouchableOpacity, StyleSheet, Text } from "react-native";
 
 import PostsScreen from "../PostsScreen/PostsScreen";
 import CreatePostsScreen from "../CreatePostsScreen/CreatePostsScreen";
 import ProfileScreen from "../ProfileScreen/ProfileScreen";
+import { useDispatch } from "react-redux";
+import { fetchLogOutUser } from "../../redux/auth/authOperations";
+import { fetchGetAllPosts } from "../../redux/posts/postsOperations";
+import { fetchGetAllComments } from "../../redux/comments/commentsOperations";
 
 const BottomTabs = createBottomTabNavigator();
 
 const Home = () => {
   const navigation = useNavigation();
 
+  const dispatch = useDispatch();
+
+  const handleLogOut = () => {
+    dispatch(fetchLogOutUser()).then((result) => {
+      result.type === "auth/fetchLogOutUser/fulfilled" && navigation.navigate("Login");
+      result.type !== "auth/fetchLogOutUser/fulfilled" && alert("Incorrect logOut!!!");
+    });
+  };
+
+  useEffect(() => {
+    dispatch(fetchGetAllComments());
+    dispatch(fetchGetAllPosts());
+  }, [dispatch]);
+
   return (
     <BottomTabs.Navigator
-      initialRouteName="Posts"
+      initialRouteName="PostsScreen"
       screenOptions={{
         tabBarShowLabel: false,
         tabBarStyle: { height: 80 },
@@ -29,7 +47,7 @@ const Home = () => {
           headerTitleAlign: "center",
           headerRightContainerStyle: { paddingRight: 20 },
           headerRight: () => (
-            <TouchableOpacity style={styles.logoutBtn} activeOpacity={0.5} onPress={() => navigation.navigate("Login")}>
+            <TouchableOpacity style={styles.logoutBtn} activeOpacity={0.5} onPress={handleLogOut}>
               <Feather name="log-out" size={24} color="gray" />
             </TouchableOpacity>
           ),

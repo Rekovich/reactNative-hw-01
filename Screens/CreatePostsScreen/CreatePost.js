@@ -4,18 +4,26 @@ import { FontAwesome } from "@expo/vector-icons";
 import { Camera } from "expo-camera";
 import * as Location from "expo-location";
 import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchUploadPhoto } from "../../redux/storage/storageOperations";
+import { fetchAddPost } from "../../redux/posts/postsOperations";
+import { selectUserId } from "../../redux/auth/authSelectors";
 
 const CreatePost = () => {
   const navigation = useNavigation();
 
   const [camera, setCamera] = useState(null);
-  const [photo, setPhoto] = useState({});
+  const [photos, setPhotos] = useState({});
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
 
   const [region, setRegion] = useState(null);
   const [inputRegion, setInputRegion] = useState("");
   const [title, setTitle] = useState("");
+
+  const dispatch = useDispatch();
+
+  const uid = useSelector(selectUserId);
 
   useEffect(() => {
     (async () => {
@@ -46,7 +54,7 @@ const CreatePost = () => {
 
   const takePhoto = async () => {
     const photo = await camera.takePictureAsync();
-    setPhoto(photo.uri);
+    setPhotos(photo.uri);
     setInputRegion(region[0]["country"] + ", " + region[0]["city"]);
   };
 
@@ -54,24 +62,25 @@ const CreatePost = () => {
     setTitle(text);
   };
 
-  const handleCreate = () => {
-    if (!title || !location || !photo) {
+  const handleCreate = async () => {
+    if (!title || !location || !photos) {
       alert("Enter all field please!");
       return;
     }
-    navigation.navigate("PostsList", { photo, location, inputRegion, title });
+    const { payload } = await dispatch(fetchUploadPhoto(photos));
+    await dispatch(fetchAddPost({ photo: payload, title, inputRegion, location, uid }));
+    navigation.navigate("PostList");
   };
 
   return (
     <View style={styles.postContainer}>
-      {/* <View style={styles.postImage}> */}
       <Camera style={styles.postImage} ref={setCamera}>
-        <Image source={{ uri: photo }} style={styles.cameraImg} />
+        <Image source={{ uri: photos }} style={styles.cameraImg} />
       </Camera>
       <TouchableOpacity style={styles.postImageAdd} activeOpacity={0.5} onPress={takePhoto}>
         <FontAwesome name="camera" size={24} color="white" />
       </TouchableOpacity>
-      {/* </View> */}
+
       <Text style={styles.postImageText}>Загрузити фото</Text>
 
       <View style={styles.postForm}>
@@ -94,8 +103,6 @@ const styles = StyleSheet.create({
   },
   postImage: {
     flex: 3,
-    // width: "80%",
-    // height: "40%",
     width: "100%",
     height: 600,
     color: "#F6F6F6",
@@ -103,10 +110,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   postImageAdd: {
-    // width: 40,
-    // height: 40,
-    // borderRadius: 100,
-    // color: "#ffffff",
     display: "flex",
     marginTop: -80,
     width: 50,
@@ -163,8 +166,6 @@ const styles = StyleSheet.create({
   cameraImg: {
     height: 220,
     width: 220,
-    // justifyContent: "flex-start",
-    // alignItems: "flex-start",
     marginTop: -80,
   },
 });
